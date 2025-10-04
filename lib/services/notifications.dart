@@ -1,48 +1,50 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
 class LocalNotificationService {
   LocalNotificationService();
 
-  final _localNotificationService = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotificationService =
+      FlutterLocalNotificationsPlugin();
 
-  Future<void> intialize() async {
+  Future<void> initialize() async {
     tz.initializeTimeZones();
-    const AndroidInitializationSettings androidInitializationSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
 
-    DarwinInitializationSettings iosInitializationSettings = const DarwinInitializationSettings(
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
 
-    final InitializationSettings settings = InitializationSettings(
-      android: androidInitializationSettings,
-      iOS: iosInitializationSettings,
-    );
+    const InitializationSettings settings =
+        InitializationSettings(android: androidSettings, iOS: iosSettings);
 
-    await _localNotificationService.initialize(
-      settings,
-    );
+    await _localNotificationService.initialize(settings);
   }
 
   Future<NotificationDetails> _notificationDetails() async {
-    const AndroidNotificationDetails androidNotificationDetails = AndroidNotificationDetails(
-        'channel_id', 'channel_name',
-        channelDescription: 'description', importance: Importance.max, priority: Priority.max, playSound: true);
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'channel_id',
+      'channel_name',
+      channelDescription: 'description',
+      importance: Importance.max,
+      priority: Priority.max,
+      playSound: true,
+    );
 
-    const DarwinNotificationDetails iosNotificationDetails = DarwinNotificationDetails();
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
 
     return const NotificationDetails(
-      android: androidNotificationDetails,
-      iOS: iosNotificationDetails,
+      android: androidDetails,
+      iOS: iosDetails,
     );
   }
 
+  // Show immediately
   Future<void> showNotification({
     required int id,
     required String title,
@@ -52,24 +54,28 @@ class LocalNotificationService {
     await _localNotificationService.show(id, title, body, details);
   }
 
-  Future<void> showScheduledNotification(
-      {required int id, required String title, required String body, required DateTime notificationDate}) async {
+  // Show scheduled notification at a specific DateTime
+  Future<void> showScheduledNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+  }) async {
     final details = await _notificationDetails();
+
+    // Convert DateTime to tz.TZDateTime in local timezone
+    final tz.TZDateTime tzScheduledDate =
+        tz.TZDateTime.from(scheduledDate, tz.local);
+
     await _localNotificationService.zonedSchedule(
       id,
       title,
       body,
-      tz.TZDateTime.from(
-        notificationDate.subtract(const Duration(hours: 157)),
-        tz.local,
-      ),
-      // tz.TZDateTime.from(
-      //   DateTime.now().add(Duration(seconds: seconds)),
-      //   tz.local,
-      // ),
+      tzScheduledDate,
       details,
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 }

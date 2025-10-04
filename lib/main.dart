@@ -36,8 +36,6 @@ class MyApp extends StatelessWidget {
       title: 'Pettle',
       theme: ThemeData(
         appBarTheme: const AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.light),
-        dialogTheme:
-            const DialogTheme(shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16)))),
         brightness: Brightness.dark,
         primarySwatch: materialMistyRose,
         fontFamily: 'PTRoot',

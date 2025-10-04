@@ -190,18 +190,28 @@ Future<void> updateUpcomingEvents() async {
 }
 
 Future<void> updateNotifications() async {
-  LocalNotificationService service = LocalNotificationService();
+  // Make sure LocalNotificationService is initialized somewhere before
+  final LocalNotificationService service = LocalNotificationService();
+
   int notificationID = 0;
-  for (dynamic event in upcomingEvents) {
+
+  for (final event in upcomingEvents) {
+    // Only handle specific event types
     if (event is Birthday || event is Deworming || event is Vaccination) {
-      if (event.nextTimeDate.difference(DateTime.now()).inHours >= 157) {
-        service.showScheduledNotification(
-            id: notificationID,
-            title: 'MARK YOUR CALENDAR',
-            body: "${event.petName}'s ${event.eventName} is just a week away",
-            notificationDate: event.nextTimeDate);
+
+      final now = DateTime.now();
+      final difference = event.nextTimeDate.difference(now);
+
+      // Check if the event is within the next 7 days
+      if (difference.inDays <= 7 && difference.isNegative == false) {
+        await service.showScheduledNotification(
+          id: notificationID,
+          title: 'MARK YOUR CALENDAR',
+          body: "${event.petName}'s ${event.eventName} is just a week away",
+           scheduledDate: event.nextTimeDate, // make sure this is in future
+        );
         notificationID++;
-        print(notificationID);
+       // print("Scheduled notification ID: $notificationID");
       }
     }
   }

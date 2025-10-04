@@ -13,7 +13,7 @@ import 'package:pet_care_app/widgets/datePickField.dart';
 import 'package:pet_care_app/widgets/profile_card.dart';
 import 'package:pet_care_app/services/notifications.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as Path;
+import 'package:path/path.dart' as path;
 import 'dart:io';
 import 'dart:async';
 
@@ -31,7 +31,7 @@ class _PetProfilesPageState extends State<PetProfilesPage> {
   @override
   void initState() {
     service = LocalNotificationService();
-    service.intialize();
+    service.initialize();
     if (_petBox.get('pettle') != null) {
       loadPetData();
     }
@@ -419,7 +419,7 @@ class _PetProfilesPageState extends State<PetProfilesPage> {
                       if (image == null) return;
 
                       final directory = await getApplicationDocumentsDirectory();
-                      final name = Path.basename(image.path);
+                      final name = path.basename(image.path);
                       final imageFile = File('${directory.path}/$name');
                       await File(image.path).copy(imageFile.path);
 
